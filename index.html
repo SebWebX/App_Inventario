@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>App de inventrios</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="page">
+  <main class="page_container app">
+    <header class="app_header">
+      <div class="app__header-main">
+        <p class="app__kicker">Tu inventario diario</p>
+        <h1 class="app__title">Inventario</h1>
+        <p class="app__subtitle">
+          Una vista clara para administrar bien los bienes
+        </p>
+      </div>
+      <aside class="app__meta" aria-label="Contexto del tablero">
+        <p class="app__meta-label">Fecha</p>
+        <p class="app__meta-value" id="current-date">--</p>
+        <p class="app__meta-note" id="daily-note">Tip del dia: revisa siempre tu stock</p>
+      </aside>
+    </header>
+
+    <section class="panel panel--form app__section">
+      <div class="panel__head">
+        <h2 class="panel__title" id="form-title">Agregar producto nuevo</h2>
+        <p class="panel__helper">Completa los campos para agregar producto</p>
+      </div>
+      <form class="form form--inventory" ud="inventory-form">
+        <div class="form__row">
+          <div class="form__group">
+            <label class="form-label" for="name">Nombre: </label>
+            <input
+            class="form__input"
+            type="text"
+            id="name"
+            name="name"
+            placeholder="Ej. Guitarra Standar Gibson"
+            required
+            />
+          </div>
+          <div class="form__group">
+            <label class="form__label" for="sku">SKU</label>
+            <input
+            class="form__input"
+            type="text"
+            id="sku"
+            name="sku"
+            placeholder="Ej. GUITAR-001"
+            required
+            />
+          </div>
+        </div>
+
+        <div class="form__row">
+          <div class="form__group">
+            <label class="form__label" for="category">Categoria</label>
+            <input
+            class="form__input"
+            type="text"
+            id="category"
+            name="category"
+            placeholder="Ej. Electronica"
+            required
+            />
+          </div>
+          <div class="form__group">
+            <label class="form__label" for="quantity">Cantidad</label>
+            <input
+            class="form__input"
+            type="number"
+            id="quantity"
+            name="quantity"
+            min="0"
+            step="1"
+            required
+            />
+          </div>
+        </div>
+
+        <div class="form__row">
+          <div class="form__group">
+            <label class="form__label" for="minStock">Stock minimo</label>
+            <input
+            class="form__input"
+            type="number"
+            id="minStock"
+            name="minStock"
+            min="0"
+            step="1"
+            required
+            />
+          </div>
+          <div class="form__group">
+            <label class="form__label" for="price">Precio unitario</label>
+            <input
+            class="form_input"
+            type="number"
+            id="price"
+            name="price"
+            min="0"
+            step="0.01"
+            required
+            />
+          </div>
+        </div>
+
+        <p class="form__hint" id="form-hint" role="status" aria-live="polite"></p>
+        <p class="form__error" id="form-error" role="alert" aria-live="polite"></p>
+
+        <div class="form__actions">
+          <button class="button button--primary" type="submit" id="submit-button">
+            Guardar producto
+          </button>
+          <button class="button button--ghost" type="button" id="cancel-edit" hidden>
+            Cancelar edicion
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="stats app__section" aria-labrl="Resumen de inventario">
+      <article class="stats__card">
+        <h3 class="stats__label">Productos activos</h3>
+        <p class="stats__value" id="stat-products">0</p>
+      </article>
+      <article class="stats__card">
+        <h3 class="stats__label">Piezas totales</h3>
+        <p class="stats__value" id="stat-units">0</p>
+      </article>
+      <article class="stats__card">
+        <h3 class="stats__label">Para reponer</h3>
+        <p class="stats__value stats__value--danger" id="stat-low">0</p>
+      </article>
+      <article class="stats__card">
+        <h3 class="stats__label">Valor estimado</h3>
+        <p class="stats__value" id="stat-value">$0.00</p>
+      </article>
+    </section>
+
+    <section class="panel panel--table app__section">
+      <div class="panel__head">
+        <h2 class="panel__title">Lo que tiene en bodega</h2>
+        <p class="panel__helper" id="inventory-feedback">Aun no hay productos</p>
+      </div>
+      <div class="filters">
+        <div class="filters__group">
+          <label class="filters__label" for="search">Busca rapido</label>
+          <input
+          class="filters__input"
+          type="search"
+          id="search"
+          placeholder="Nombre, SKU o categoria"
+          />
+        </div>
+        <div class="filters__group">
+          <label class="filters__label" for="status-filter">Filtrar por estado</label>
+          <select class="filters__select" id="status-filter">
+            <option value="all">Todos</option>
+            <option value="ok">Stock normal</option>
+            <option value="low">Stock bajo</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="inventory-table__wrapper">
+        <table class="inventory-table">
+          <thead class="inventory-table__head">
+            <tr class="inventory-table__row">
+              <th class="inventory-table__cell inventory-table__cell--head">Nombre</th>
+              <th class="inventory-table__cell inventory-table__cell--head">SKU</th>
+              <th class="inventory-table__cell inventory-table__cell--head">Categoria</th>
+              <th class="inventory-table__cell inventory-table__cell--head">Cantidad</th>
+              <th class="inventory-table__cell inventory-table__cell--head">Stock minimo</th>
+              <th class="inventory-table__cell inventory-table__cell--head">Precio</th>
+              <th class="inventory-table__cell inventory-table__cell--head">Valor</th>
+              <th class="inventory-table__cell inventory-table__cell--head">Estado</th>
+              <th class="inventory-table__cell inventory-table__cell--head">Acciones</th>
+            </tr>
+          </thead>
+        </table>
+        <tbody class="inventory-table__body" id="inventory-body"></tbody>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
