@@ -338,3 +338,76 @@ function validatePayload(payload) {
 
     showHint(`Producto "${item.name}" eliminado.`)
  }
+
+function adjustQuantity(id, diff){
+    const item = state.item.find((entry) => entry.id === id);
+    if(!item){
+        return;
+    }
+
+    const nextQuantity = item.quantity + diff;
+    if(nextQuantity < 0){
+        return;
+    }
+
+    item.quantity = nextQuantity;
+    item.apdatedAt = Date.now();
+    saveItems();
+    render();
+ }
+
+ function getItemStatus(item){
+    return item.quantity <= item.minStock ? STATUS.low : STATUS.ok;
+ }
+
+ function getFilteredItems(){
+    return state.items
+    .filter((item) =>{
+        const query = state.filters.search;
+        const matchesSearch =
+        !query ||
+        item.name.toLowerCase().includes(query) ||
+        item.sku.toLowerCase().includes(query) ||
+        item.category.toLowerCase().includes(query);
+
+        if(!matchesSearch){
+            return false;
+        }
+
+        if(state.filters.status === STATUS.all){
+            return true;
+        }
+
+        return state.filters.status === getItemStatus(item);
+    })
+    .sort((a,b) => a.name.localeCompare(b.name))
+ }
+
+ function render(){
+    renderStat();
+    renderTable();
+ }
+
+ function renderStats(){
+    const totalProducts = state.items.length;
+    const totalUnits = state.items.reduce((sum, item) => sum + item.quantity, 0);
+    const lowStock = state.items.filter((item) => getItemStatus(item) === STATUS.low).length;
+    const totalValue = state.items.reduce((sum, item) => sum + item.quantity * item.price, 0);
+
+    elements.statProducts.textContent = String(totalProducts);
+    elements.statUnits.textContent = String(totalUnits);
+    elements.statLow.textContent = String(lowStock);
+    elements.statValue.textContent = formatCurrency(totalValue);
+
+    if(totalProducts === 0){
+        elements.inventoryFeedback.textContent = "Sin productos registrados";
+        return;
+    }
+
+    if(lowStock > 0){
+        elements.inventoryFeedback.textContent = `Hay ${lowStock} producto(s) en stock bajo.`;
+        return;
+    }
+
+    elements.inventoryFeedback.textContent = "Inventario del dia.";
+ }
